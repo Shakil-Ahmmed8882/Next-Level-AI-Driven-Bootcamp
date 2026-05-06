@@ -11,6 +11,8 @@ let isActive: boolean = true;
 // 2. Arrays
 let scores: number[] = [90, 85, 88];
 
+
+
 // 3. Tuple
 let userTuple: [string, number] = ["Alice", 30];
 
