@@ -1,0 +1,14 @@
+{
+  "name": "next-level-ai-driven-software-engineer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Advanced TypeScript learning and assignments",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["typescript", "oop", "generics"],
+  "author": "Shakil Ahmmed",
+  "license": "ISC"
+}
