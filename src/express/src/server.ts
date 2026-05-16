@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const pool = new Pool({
-  connectionString: config.databaseUrl,
+  connectionString: `___`,
 });
   
 
@@ -117,6 +117,37 @@ app.get("/users/:id", async (req: Request, res: Response) => {
       error: error
     });
   }
+})
+
+app.put("/users/:id", async (req: Request, res: Response) => {
+    try {
+        const {id} = req.params; 
+        const {name, email, is_active, age, password} = req.body; 
+        const result = await pool.query(`
+            UPDATE users SET name = $1, email = $2, is_active = $3, age = $4, password = $5, updated_at = NOW()
+            WHERE id = $6
+            RETURNING *
+        `, [name, email, is_active, age, password, id]);
+
+        if(result.rows.length === 0) {
+            return res.status(404).send({
+                message: "User not found",
+                data: null
+            });
+        }
+
+        res.status(200).send({
+            message: "Updated user successfully",
+            data: result.rows[0],
+        });
+        
+    } catch (error:any) {
+            res.status(500).send({
+                message: error.message || "Something went wrong",
+                error: error
+            });
+        
+    }
 })
 
 app.listen(port, () => {

@@ -1,9 +1,10 @@
-
+import path from "path";
 import dotenv from "dotenv";
 
-console.log(process.cwd() + ".env")
+const envPath = path.join(process.cwd(), ".env");
+console.log(envPath);
 dotenv.config({
-    path: process.cwd() + ".env"
+    path: envPath
 })
 
 const config = {
