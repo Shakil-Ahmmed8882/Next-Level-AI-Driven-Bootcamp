@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const pool = new Pool({
-  connectionString: `___`,
+  connectionString: config.databaseUrl,
 });
   
 
