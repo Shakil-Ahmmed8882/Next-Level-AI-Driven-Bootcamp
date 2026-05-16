@@ -124,7 +124,17 @@ app.put("/users/:id", async (req: Request, res: Response) => {
         const {id} = req.params; 
         const {name, email, is_active, age, password} = req.body; 
         const result = await pool.query(`
-            UPDATE users SET name = $1, email = $2, is_active = $3, age = $4, password = $5, updated_at = NOW()
+            UPDATE users 
+            SET name = COALESCE($1, name),
+            email = COALESCE($2, email), 
+            is_active = COALESCE($3, is_active), 
+            age = COALESCE($4, age), 
+            password = COALESCE($5, password), 
+            updated_at = NOW()
+
+
+
+
             WHERE id = $6
             RETURNING *
         `, [name, email, is_active, age, password, id]);
@@ -146,6 +156,37 @@ app.put("/users/:id", async (req: Request, res: Response) => {
                 message: error.message || "Something went wrong",
                 error: error
             });
+        
+    }
+})
+
+app.delete("/users/:id", async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query(`
+            DELETE FROM users WHERE id = $1 RETURNING *
+        `, [id]);
+
+        if(result.rows.length === 0) {
+            return res.status(404).send({
+                message: "User not found",
+                data: null
+            });
+        }
+
+
+        
+        res.status(200).send({
+            message: "Deleted user successfully",
+            data: result.rows[0],
+        });
+
+
+    } catch (error: any) {
+            res.status(500).send({
+                message: error.message || "Something went wrong",
+                error: error
+            })
         
     }
 })
