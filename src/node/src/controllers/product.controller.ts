@@ -7,6 +7,9 @@ export const productController = async (req: IncomingMessage, res: ServerRespons
 
     const method = req.method;
     const url = req.url;
+    const id = url?.split("/")[2];
+    
+    
 
     try {
         if (method === "GET" && url === "/products") {
@@ -18,6 +21,9 @@ export const productController = async (req: IncomingMessage, res: ServerRespons
             insertProduct(body);
             res.writeHead(201, {"content-type": "application/json"});
             res.end(JSON.stringify({ message: "Product created successfully" }));
+        } else if(method === "PUT" && url === `/products/${id}`) {
+            res.end(JSON.stringify({ message: `Update product with id ${id}` }));
+        
         } else {
             res.writeHead(404, {"content-type": "application/json"});
             res.end(JSON.stringify({ error: "Not found" }));
