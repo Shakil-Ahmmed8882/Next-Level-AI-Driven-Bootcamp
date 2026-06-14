@@ -33,12 +33,15 @@ const loginUserIntoDB = async (payload: payload) => {
     // 
     const jwtPayload = {
         id: userData.id, 
-        email: userData.email
+        email: userData.email,
+        role: userData.role
     }
-    const accessToken = jwt.sign(jwtPayload, config.jwtSecret, { expiresIn: "1h" });
+    const accessToken = jwt.sign(jwtPayload, config.jwt.access, { expiresIn: "1d" });
+    const refreshToken = jwt.sign(jwtPayload, config.jwt.refresh, { expiresIn: "7d" });
 
     return {
-        accessToken
+        accessToken,
+        refreshToken
     }
 
 
@@ -47,6 +50,38 @@ const loginUserIntoDB = async (payload: payload) => {
 
 }
 
+const generateRefreshToken = async (token: string) => {
+    if(!token) {
+        throw new Error("No token provided");
+    }
+    const decoded = jwt.verify(token, config.jwt.refresh) as unknown as payload;
+
+    const user = await pool.query(`
+        SELECT * FROM users WHERE email = $1
+        `, [decoded.email])
+
+        if(!user.rows[0]) {
+            throw new Error("User not found");
+        }
+
+        if(user.rows[0].is_active === false) {
+            throw new Error("User account is inactive");
+        }
+
+        const userData = user.rows[0];
+        
+    const jwtPayload = {
+        id: userData.id, 
+        email: userData.email,
+        role: userData.role
+    }
+    const accessToken = jwt.sign(jwtPayload, config.jwt.access, { expiresIn: "1d" });
+    return {
+        accessToken
+    }
+}
+
 export const authServices = {
-    loginUserIntoDB
+    loginUserIntoDB,
+    generateRefreshToken
 }

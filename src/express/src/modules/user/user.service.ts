@@ -42,6 +42,8 @@ const deleteUserFromDB = async (id: string) => {
   return result.rows[0] || null;
 };
 
+
+
 export const userServices = {
   createUserIntoDB,
   getAllUsersFromDB,

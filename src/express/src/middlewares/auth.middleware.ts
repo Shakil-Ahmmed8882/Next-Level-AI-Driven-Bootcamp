@@ -8,7 +8,14 @@ type JwtPayload = {
   email: string;
 };
 
-export const auth = () => {
+const USER_ROLES = {
+  ADMIN: "admin",
+  USER: "user",
+  GUEST: "guest"
+} as const;
+type UserRole = typeof USER_ROLES[keyof typeof USER_ROLES];
+
+export const auth = (...roles: UserRole[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
@@ -17,11 +24,11 @@ export const auth = () => {
       return;
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1]??"";
 
     let decoded: JwtPayload;
     try {
-      decoded = jwt.verify(token, config.jwtSecret) as unknown as JwtPayload;
+      decoded = jwt.verify(token, config.jwt.access) as unknown as JwtPayload;
     } catch {
       res.status(401).json({ message: "Unauthorized: Invalid or expired token" });
       return;
@@ -39,8 +46,11 @@ export const auth = () => {
       res.status(403).json({ message: "Forbidden: User account is inactive" });
       return;
     }
-
-    (req as any).user = user;
+    if (roles.length > 0 && !roles.includes(user.role)) {
+      res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+      return;
+    }
+    req.user = user;
     next();
   };
 };
